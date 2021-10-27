@@ -3,6 +3,9 @@
 import { withStorageKey } from '@automattic/state-utils';
 import {
 	STORED_CARDS_ADD_COMPLETED,
+	STORED_CARDS_EDIT,
+	STORED_CARDS_EDIT_COMPLETED,
+	STORED_CARDS_EDIT_FAILED,
 	STORED_CARDS_FETCH,
 	STORED_CARDS_FETCH_COMPLETED,
 	STORED_CARDS_FETCH_FAILED,
@@ -28,6 +31,15 @@ export const items = withSchemaValidation( storedCardsSchema, ( state = [], acti
 			const { item } = action;
 			return [ ...state, item ];
 		}
+		case STORED_CARDS_EDIT_COMPLETED: {
+			const { card, tax_postal_code, tax_country_code } = action;
+			return state.map( ( item ) => {
+				if ( ! card.allStoredDetailsIds.includes( item.stored_details_id ) ) {
+					return item;
+				}
+				return { ...card, tax_postal_code, tax_country_code };
+			} );
+		}
 		case STORED_CARDS_FETCH_COMPLETED: {
 			const { list } = action;
 			return list;
@@ -45,7 +57,7 @@ export const items = withSchemaValidation( storedCardsSchema, ( state = [], acti
 					return {
 						...item,
 						meta: [
-							...item.meta?.filter( ( meta ) => meta.meta_key !== 'is_backup' ),
+							...( item.meta?.filter( ( meta ) => meta.meta_key !== 'is_backup' ) ?? {} ),
 							{ meta_key: 'is_backup', meta_value: is_backup ? 'backup' : null },
 						],
 					};
@@ -97,6 +109,32 @@ export const isFetching = ( state = false, action ) => {
 
 /**
  * `Reducer` function which handles request/response actions
+ * concerning stored card editing
+ *
+ * @param {object} state - current state
+ * @param {object} action - storedCard action
+ * @returns {object} updated state
+ */
+export const isEditing = ( state = {}, action ) => {
+	switch ( action.type ) {
+		case STORED_CARDS_EDIT:
+			return {
+				...state,
+				[ action.card.stored_details_id ]: true,
+			};
+
+		case STORED_CARDS_EDIT_FAILED:
+		case STORED_CARDS_EDIT_COMPLETED:
+			const nextState = { ...state };
+			delete nextState[ action.card.stored_details_id ];
+			return nextState;
+	}
+
+	return state;
+};
+
+/**
+ * `Reducer` function which handles request/response actions
  * concerning stored card deletion
  *
  * @param {object} state - current state
@@ -124,6 +162,7 @@ export const isDeleting = ( state = {}, action ) => {
 const combinedReducer = combineReducers( {
 	hasLoadedFromServer,
 	isDeleting,
+	isEditing,
 	isFetching,
 	items,
 } );

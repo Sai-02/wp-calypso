@@ -5,33 +5,11 @@ import styled from '@emotion/styled';
 import { useTranslate } from 'i18n-calypso';
 import { FunctionComponent } from 'react';
 import * as React from 'react';
-import { useGetProductVariants } from '../hooks/product-variants';
+import { useGetProductVariants } from '../../hooks/product-variants';
+import type { ItemVariationPickerProps, WPCOMProductVariant, OnChangeItemVariant } from './types';
 import type { ResponseCartProduct } from '@automattic/shopping-cart';
 
-export type WPCOMProductSlug = string;
-
-export type WPCOMProductVariant = {
-	variantLabel: string;
-	variantDetails: React.ReactNode;
-	productSlug: WPCOMProductSlug;
-	productId: number;
-};
-
-export type ItemVariationPickerProps = {
-	selectedItem: ResponseCartProduct;
-	onChangeItemVariant: OnChangeItemVariant;
-	isDisabled: boolean;
-	siteId: number | undefined;
-	productSlug: string;
-};
-
-export type OnChangeItemVariant = (
-	uuid: string,
-	productSlug: WPCOMProductSlug,
-	productId: number
-) => void;
-
-export const ItemVariationPicker: FunctionComponent< ItemVariationPickerProps > = ( {
+export const ItemVariationRadioButtons: FunctionComponent< ItemVariationPickerProps > = ( {
 	selectedItem,
 	onChangeItemVariant,
 	isDisabled,
@@ -45,7 +23,7 @@ export const ItemVariationPicker: FunctionComponent< ItemVariationPickerProps > 
 	}
 
 	return (
-		<TermOptions className="item-variation-picker">
+		<TermOptions className="item-variation-radio-buttons">
 			{ variants.map( ( productVariant: WPCOMProductVariant ) => (
 				<ProductVariant
 					key={ productVariant.productSlug + productVariant.variantLabel }

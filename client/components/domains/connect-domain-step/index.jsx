@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import ConnectDomainStepSupportInfoLink from 'calypso/components/domains/connect-domain-step/connect-domain-step-support-info-link';
 import DomainTransferRecommendation from 'calypso/components/domains/domain-transfer-recommendation';
 import FormattedHeader from 'calypso/components/formatted-header';
+import { isSubdomain } from 'calypso/lib/domains';
 import wpcom from 'calypso/lib/wp';
 import { domainManagementList } from 'calypso/my-sites/domains/paths';
 import { getDomainsBySiteId, hasLoadedSiteDomains } from 'calypso/state/sites/domains/selectors';
@@ -23,7 +24,10 @@ import './style.scss';
 
 function ConnectDomainStep( { domain, selectedSite, initialSetupInfo, initialStep, showErrors } ) {
 	const { __ } = useI18n();
-	const [ pageSlug, setPageSlug ] = useState( stepSlug.SUGGESTED_START );
+	const firstStep = isSubdomain( domain )
+		? stepSlug.SUBDOMAIN_SUGGESTED_START
+		: stepSlug.SUGGESTED_START;
+	const [ pageSlug, setPageSlug ] = useState( firstStep );
 	const [ verificationStatus, setVerificationStatus ] = useState( {} );
 	const [ verificationInProgress, setVerificationInProgress ] = useState( false );
 	const [ domainSetupInfo, setDomainSetupInfo ] = useState( defaultDomainSetupInfo );
@@ -48,10 +52,21 @@ function ConnectDomainStep( { domain, selectedSite, initialSetupInfo, initialSte
 			setVerificationStatus( {} );
 			setVerificationInProgress( true );
 
-			const connectedSlug =
+			let connectedSlug =
 				modeType.SUGGESTED === mode ? stepSlug.SUGGESTED_CONNECTED : stepSlug.ADVANCED_CONNECTED;
-			const verifyingSlug =
+			let verifyingSlug =
 				modeType.SUGGESTED === mode ? stepSlug.SUGGESTED_VERIFYING : stepSlug.ADVANCED_VERIFYING;
+
+			if ( isSubdomain( domain ) ) {
+				connectedSlug =
+					modeType.SUGGESTED === mode
+						? stepSlug.SUBDOMAIN_SUGGESTED_CONNECTED
+						: stepSlug.SUBDOMAIN_ADVANCED_CONNECTED;
+				verifyingSlug =
+					modeType.SUGGESTED === mode
+						? stepSlug.SUBDOMAIN_SUGGESTED_VERIFYING
+						: stepSlug.SUBDOMAIN_ADVANCED_VERIFYING;
+			}
 
 			wpcom
 				.domain( domain )

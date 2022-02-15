@@ -91,9 +91,8 @@ export const connectADomainStepsDefinition = {
 		component: ConnectDomainStepDone,
 		prev: stepSlug.ADVANCED_UPDATE,
 	},
-};
 
-export const connectASubdomainStepsDefinition = {
+	// Subdomain connection steps
 	// Suggested flow
 	[ stepSlug.SUBDOMAIN_SUGGESTED_START ]: {
 		mode: modeType.SUGGESTED,

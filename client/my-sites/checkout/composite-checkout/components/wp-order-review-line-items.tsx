@@ -114,6 +114,7 @@ export function WPOrderReviewLineItems( {
 									isDisabled={ isDisabled }
 									siteId={ siteId }
 									productSlug={ product.product_slug }
+									type="dropdown"
 								/>
 							) }
 						</LineItem>

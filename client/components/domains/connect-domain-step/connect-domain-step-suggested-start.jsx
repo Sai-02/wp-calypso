@@ -24,7 +24,10 @@ export default function ConnectDomainStepSuggestedStart( {
 	setPage,
 } ) {
 	const { __ } = useI18n();
-	const switchToAdvancedSetup = () => setPage( stepSlug.ADVANCED_START );
+	const firstStep = isSubdomain( domain )
+		? stepSlug.SUBDOMAIN_ADVANCED_START
+		: stepSlug.ADVANCED_START;
+	const switchToAdvancedSetup = () => setPage( firstStep );
 
 	const message = isSubdomain( domain )
 		? __(

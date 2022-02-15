@@ -6,6 +6,7 @@ import CardHeading from 'calypso/components/card-heading';
 import MaterialIcon from 'calypso/components/material-icon';
 import Notice from 'calypso/components/notice';
 import NoticeAction from 'calypso/components/notice/notice-action';
+import { isSubdomain } from 'calypso/lib/domains';
 import ConnectDomainStepWrapper from './connect-domain-step-wrapper';
 import { modeType, stepSlug, stepsHeading } from './constants';
 
@@ -13,6 +14,7 @@ import './style.scss';
 
 export default function ConnectDomainStepAdvancedStart( {
 	className,
+	domain,
 	pageSlug,
 	mode,
 	onNextStep,
@@ -21,6 +23,14 @@ export default function ConnectDomainStepAdvancedStart( {
 } ) {
 	const { __ } = useI18n();
 	const switchToSuggestedSetup = () => setPage( stepSlug.SUGGESTED_START );
+
+	const message = isSubdomain( domain )
+		? __(
+				'This is the advanced way to connect your subdomain, using CNAME records. We advise using our <a>suggested setup</a> instead, with NS records.'
+		  )
+		: __(
+				'This is the advanced way to connect your domain, using root A records & CNAME records. We advise using our <a>suggested setup</a> instead, with WordPress.com name servers.'
+		  );
 
 	const stepContent = (
 		<>
@@ -38,17 +48,12 @@ export default function ConnectDomainStepAdvancedStart( {
 			</Notice>
 			<div className={ className + '__suggested-start' }>
 				<p className={ className + '__text' }>
-					{ createInterpolateElement(
-						__(
-							'This is the advanced way to connect your domain, using root A records & CNAME records. We advise using our <a>suggested setup</a> instead, with WordPress.com name servers.'
-						),
-						{
-							a: createElement( 'a', {
-								className: 'connect-domain-step__change_mode_link',
-								onClick: switchToSuggestedSetup,
-							} ),
-						}
-					) }
+					{ createInterpolateElement( message, {
+						a: createElement( 'a', {
+							className: 'connect-domain-step__change_mode_link',
+							onClick: switchToSuggestedSetup,
+						} ),
+					} ) }
 				</p>
 				<CardHeading className={ className + '__sub-heading' }>
 					<MaterialIcon className={ className + '__sub-heading-icon' } size={ 24 } icon="timer" />

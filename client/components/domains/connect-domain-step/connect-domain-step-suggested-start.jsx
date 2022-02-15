@@ -9,12 +9,14 @@ import {
 	stepSlug,
 } from 'calypso/components/domains/connect-domain-step/constants';
 import MaterialIcon from 'calypso/components/material-icon';
+import { isSubdomain } from 'calypso/lib/domains';
 import ConnectDomainStepWrapper from './connect-domain-step-wrapper';
 
 import './style.scss';
 
 export default function ConnectDomainStepSuggestedStart( {
 	className,
+	domain,
 	pageSlug,
 	mode,
 	onNextStep,
@@ -24,20 +26,23 @@ export default function ConnectDomainStepSuggestedStart( {
 	const { __ } = useI18n();
 	const switchToAdvancedSetup = () => setPage( stepSlug.ADVANCED_START );
 
+	const message = isSubdomain( domain )
+		? __(
+				'This is the easiest way to connect your subdomain, using NS records. If needed you can also use our <a>advanced setup</a>, using CNAME records.'
+		  )
+		: __(
+				'This is the easiest way to connect your domain, using name servers. If needed you can also use our <a>advanced setup</a>, using root A & CNAME records.'
+		  );
+
 	const stepContent = (
 		<div className={ className + '__suggested-start' }>
 			<p className={ className + '__text' }>
-				{ createInterpolateElement(
-					__(
-						'This is the easiest way to connect your domain, using name servers. If needed you can also use our <a>advanced setup</a>, using root A & CNAME records.'
-					),
-					{
-						a: createElement( 'a', {
-							className: 'connect-domain-step__change_mode_link',
-							onClick: switchToAdvancedSetup,
-						} ),
-					}
-				) }
+				{ createInterpolateElement( message, {
+					a: createElement( 'a', {
+						className: 'connect-domain-step__change_mode_link',
+						onClick: switchToAdvancedSetup,
+					} ),
+				} ) }
 			</p>
 			<CardHeading tagName="h2" className={ className + '__sub-heading' }>
 				<MaterialIcon className={ className + '__sub-heading-icon' } size={ 24 } icon="timer" />

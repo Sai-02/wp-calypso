@@ -98,7 +98,7 @@ export const connectASubdomainStepsDefinition = {
 	[ stepSlug.SUBDOMAIN_SUGGESTED_START ]: {
 		mode: modeType.SUGGESTED,
 		step: stepType.START,
-		component: ConnectDomainStepSuggestedStart, // TODO: change
+		component: ConnectDomainStepSuggestedStart,
 		next: stepSlug.SUBDOMAIN_SUGGESTED_LOGIN,
 	},
 	[ stepSlug.SUBDOMAIN_SUGGESTED_LOGIN ]: {
@@ -129,7 +129,7 @@ export const connectASubdomainStepsDefinition = {
 	[ stepSlug.SUBDOMAIN_SUGGESTED_VERIFYING ]: {
 		mode: modeType.SUGGESTED,
 		step: stepType.VERIFYING,
-		component: ConnectDomainStepDone, // TODO: change
+		component: ConnectDomainStepDone,
 		prev: stepSlug.SUBDOMAIN_SUGGESTED_UPDATE,
 	},
 
@@ -137,7 +137,7 @@ export const connectASubdomainStepsDefinition = {
 	[ stepSlug.SUBDOMAIN_ADVANCED_START ]: {
 		mode: modeType.ADVANCED,
 		step: stepType.START,
-		component: ConnectDomainStepAdvancedStart, // TODO: change
+		component: ConnectDomainStepAdvancedStart,
 		next: stepSlug.SUBDOMAIN_ADVANCED_LOGIN,
 		prev: stepSlug.SUBDOMAIN_SUGGESTED_START,
 	},
@@ -169,7 +169,7 @@ export const connectASubdomainStepsDefinition = {
 	[ stepSlug.SUBDOMAIN_ADVANCED_VERIFYING ]: {
 		mode: modeType.ADVANCED,
 		step: stepType.VERIFYING,
-		component: ConnectDomainStepDone, // TODO: change
+		component: ConnectDomainStepDone,
 		prev: stepSlug.SUBDOMAIN_ADVANCED_UPDATE,
 	},
 };

@@ -125,7 +125,7 @@ export const connectASubdomainStepsDefinition = {
 	[ stepSlug.SUBDOMAIN_SUGGESTED_CONNECTED ]: {
 		mode: modeType.SUGGESTED,
 		step: stepType.CONNECTED,
-		component: ConnectDomainStepDone, // TODO: change
+		component: ConnectDomainStepDone,
 		prev: stepSlug.SUBDOMAIN_SUGGESTED_UPDATE,
 	},
 	[ stepSlug.SUBDOMAIN_SUGGESTED_VERIFYING ]: {
@@ -165,7 +165,7 @@ export const connectASubdomainStepsDefinition = {
 	[ stepSlug.SUBDOMAIN_ADVANCED_CONNECTED ]: {
 		mode: modeType.ADVANCED,
 		step: stepType.CONNECTED,
-		component: ConnectDomainStepDone, // TODO: change
+		component: ConnectDomainStepDone,
 		prev: stepSlug.SUBDOMAIN_ADVANCED_UPDATE,
 	},
 	[ stepSlug.SUBDOMAIN_ADVANCED_VERIFYING ]: {

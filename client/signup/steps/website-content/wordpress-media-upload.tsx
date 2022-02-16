@@ -60,7 +60,9 @@ export interface MediaUploadData {
 	mediaIndex: number;
 }
 interface WordpressMediaUploadProps {
-	onMediaUploaded: ( imageData: MediaUploadData ) => void;
+	onMediaUploadComplete: ( imageData: MediaUploadData ) => void;
+	onMediaUploadStart?: () => void;
+	onMediaUploadFailed?: () => void;
 	mediaIndex: number;
 	site: SiteData;
 	initialUrl: string;
@@ -70,7 +72,9 @@ interface WordpressMediaUploadProps {
 export function WordpressMediaUpload( {
 	mediaIndex,
 	site,
-	onMediaUploaded,
+	onMediaUploadComplete,
+	onMediaUploadStart,
+	onMediaUploadFailed,
 	initialUrl,
 	initialCaption,
 }: WordpressMediaUploadProps ) {
@@ -83,15 +87,17 @@ export function WordpressMediaUpload( {
 	const addMedia = useAddMedia();
 	const onPick = async function ( file: FileList ) {
 		setImageCaption( '' );
+		onMediaUploadStart && onMediaUploadStart();
 		setUploadState( UPLOAD_STATES.IN_PROGRESS );
 		try {
 			const [ { title, URL, ID } ] = await addMedia( file, site );
 			setUploadedImageUrl( URL );
 			setImageCaption( title );
-			onMediaUploaded( { title, URL, uploadID: ID, mediaIndex } );
+			onMediaUploadComplete( { title, URL, uploadID: ID, mediaIndex } );
 			setUploadState( UPLOAD_STATES.COMPLETED );
 		} catch ( e: any ) {
 			setUploadState( UPLOAD_STATES.FAILED );
+			onMediaUploadFailed && onMediaUploadFailed();
 			debug( 'Image upload failed' );
 			debug( e.message );
 		}

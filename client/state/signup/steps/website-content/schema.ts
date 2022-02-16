@@ -55,9 +55,11 @@ export type WebsiteContent = Array< PageData >;
 export interface WebsiteContentCollection {
 	currentIndex: number;
 	websiteContent: WebsiteContent;
+	imageUploadStates: Record< string, Record< string, string > >;
 }
 
 export const initialState: WebsiteContentCollection = {
 	currentIndex: 0,
 	websiteContent: [],
+	imageUploadStates: {},
 };

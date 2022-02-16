@@ -2,13 +2,19 @@ import {
 	SIGNUP_STEPS_WEBSITE_CONTENT_UPDATE_CURRENT_INDEX,
 	SIGNUP_STEPS_WEBSITE_CONTENT_UPDATE,
 	SIGNUP_COMPLETE_RESET,
-	SIGNUP_STEPS_WEBSITE_CONTENT_IMAGE_UPLOADED,
+	SIGNUP_STEPS_WEBSITE_CONTENT_IMAGE_UPLOAD_COMPLETED,
 	SIGNUP_STEPS_WEBSITE_CONTENT_TEXT_CHANGED,
 	SIGNUP_STEPS_WEBSITE_CONTENT_INITIALIZE_PAGES,
+	SIGNUP_STEPS_WEBSITE_CONTENT_IMAGE_UPLOAD_STARTED,
 } from 'calypso/state/action-types';
 import { withSchemaValidation } from 'calypso/state/utils';
 import { schema, initialState, WebsiteContentCollection, PageData } from './schema';
 import type { AnyAction } from 'redux';
+const IMAGE_UPLOAD_STATES: {
+	UPLOAD_STARTED: 'UPLOAD_STARTED';
+	UPLOAD_COMPLETED: 'UPLOAD_COMPLETED';
+	UPLOAD_FAILED: 'UPLOAD_FAILED';
+};
 
 export default withSchemaValidation(
 	schema,
@@ -37,7 +43,21 @@ export default withSchemaValidation(
 					currentIndex: action.payload,
 				};
 
-			case SIGNUP_STEPS_WEBSITE_CONTENT_IMAGE_UPLOADED: {
+			case SIGNUP_STEPS_WEBSITE_CONTENT_IMAGE_UPLOAD_STARTED: {
+				const { payload } = action;
+
+				return {
+					...state,
+					imageUploadStates: {
+						...state.imageUploadStates,
+						[ payload.pageId ]: {
+							...state.imageUploadStates[ payload.pageId ],
+							[ payload.mediaIndex ]: IMAGE_UPLOAD_STATES.UPLOAD_STARTED,
+						},
+					},
+				};
+			}
+			case SIGNUP_STEPS_WEBSITE_CONTENT_IMAGE_UPLOAD_COMPLETED: {
 				const { payload } = action;
 
 				const pageIndex = state.websiteContent.findIndex( ( page ) => page.id === payload.id );
@@ -55,6 +75,14 @@ export default withSchemaValidation(
 						},
 						...state.websiteContent.slice( pageIndex + 1 ),
 					],
+
+					imageUploadStates: {
+						...state.imageUploadStates,
+						[ payload.id ]: {
+							...state.imageUploadStates[ payload.id ],
+							[ payload.mediaIndex ]: IMAGE_UPLOAD_STATES.UPLOAD_COMPLETED,
+						},
+					},
 				};
 			}
 			case SIGNUP_STEPS_WEBSITE_CONTENT_TEXT_CHANGED: {

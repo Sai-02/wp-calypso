@@ -7,7 +7,12 @@ import {
 	TextAreaField,
 	HorizontalGrid,
 } from 'calypso/signup/accordion-form/form-components';
-import { imageUploaded, textChanged } from 'calypso/state/signup/steps/website-content/actions';
+import { ValidationErrors } from 'calypso/signup/accordion-form/types';
+import {
+	imageUploaded,
+	imageUploadInitiated,
+	textChanged,
+} from 'calypso/state/signup/steps/website-content/actions';
 import { PageData } from 'calypso/state/signup/steps/website-content/schema';
 import { getSelectedSite } from 'calypso/state/ui/selectors';
 import { SiteData } from 'calypso/state/ui/selectors/get-selected-site';
@@ -22,7 +27,7 @@ export function PageDetails( {
 	onChangeField,
 }: {
 	page: PageData;
-	formErrors: any;
+	formErrors: ValidationErrors;
 	onChangeField?: ( { target: { name, value } }: ChangeEvent< HTMLInputElement > ) => void;
 } ) {
 	const translate = useTranslate();
@@ -31,7 +36,16 @@ export function PageDetails( {
 	const pageTitle = page.title;
 	const pageID = page.id;
 
-	const onMediaUploaded = ( { title, URL, uploadID, mediaIndex }: MediaUploadData ) => {
+	const onMediaUploadStart = ( { mediaIndex }: MediaUploadData ) => {
+		dispatch(
+			imageUploadInitiated( {
+				pageId: page.id,
+				mediaIndex,
+			} )
+		);
+	};
+
+	const onMediaUploadComplete = ( { title, URL, uploadID, mediaIndex }: MediaUploadData ) => {
 		dispatch(
 			imageUploaded( {
 				id: page.id,
@@ -85,7 +99,9 @@ export function PageDetails( {
 						key={ image.uploadID ?? i }
 						mediaIndex={ i }
 						site={ site as SiteData }
-						onMediaUploaded={ onMediaUploaded }
+						onMediaUploadStart={ onMediaUploadStart }
+						onMediaUploadFailed={ onMediaUploadFailed }
+						onMediaUploadComplete={ onMediaUploadComplete }
 						initialCaption={ image.caption }
 						initialUrl={ image.url }
 					/>

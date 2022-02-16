@@ -124,9 +124,15 @@ export function useGetProductVariants(
 
 	const getProductVariantFromAvailableVariant = useCallback(
 		( variant: AvailableProductVariantAndCompared ): WPCOMProductVariant => {
+			const currentPrice =
+				variant.introductoryOfferPrice !== null
+					? variant.introductoryOfferPrice
+					: variant.priceFinal || variant.priceFull;
+
 			return {
 				variantLabel: getTermText( variant.plan.term, translate ),
-				variantDetails: <VariantPrice variant={ variant } />,
+				variantDetails: <VariantPrice currentPrice={ currentPrice } variant={ variant } />,
+				variantPrice: myFormatCurrency( currentPrice, variant.product.currency_code ),
 				productSlug: variant.planSlug,
 				productId: variant.product.product_id,
 			};

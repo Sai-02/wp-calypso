@@ -32,7 +32,10 @@ import { downloadTrafficGuide } from 'calypso/my-sites/marketing/ultimate-traffi
 import { recordTracksEvent } from 'calypso/state/analytics/actions';
 import { recordStartTransferClickInThankYou } from 'calypso/state/domains/actions';
 import isAtomicSite from 'calypso/state/selectors/is-site-automated-transfer';
-import { getJetpackSearchCustomizeUrl } from 'calypso/state/sites/selectors';
+import {
+	getJetpackSearchCustomizeUrl,
+	getJetpackSearchDashboardUrl,
+} from 'calypso/state/sites/selectors';
 import getCheckoutUpgradeIntent from '../../../state/selectors/get-checkout-upgrade-intent';
 
 import './style.scss';
@@ -477,10 +480,12 @@ export class CheckoutThankYouHeader extends PureComponent {
 	}
 
 	getSearchButtonProps() {
-		const { translate, selectedSite, jetpackSearchCustomizeUrl } = this.props;
-
-		// Should come from a selector.
-		const jetpackSearchDashboardUrl = '#';
+		const {
+			translate,
+			selectedSite,
+			jetpackSearchCustomizeUrl,
+			jetpackSearchDashboardUrl,
+		} = this.props;
 
 		const buttonTitle = selectedSite.jetpack
 			? translate( 'Go to Search Dashboard' )
@@ -660,6 +665,7 @@ export default connect(
 		upgradeIntent: ownProps.upgradeIntent || getCheckoutUpgradeIntent( state ),
 		isAtomic: isAtomicSite( state, ownProps.selectedSite?.ID ),
 		jetpackSearchCustomizeUrl: getJetpackSearchCustomizeUrl( state, ownProps.selectedSite?.ID ),
+		jetpackSearchDashboardUrl: getJetpackSearchDashboardUrl( state, ownProps.selectedSite?.ID ),
 	} ),
 	{
 		recordStartTransferClickInThankYou,

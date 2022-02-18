@@ -14,7 +14,7 @@ export const PAYMENT_AGREEMENTS_PARTNERS = [ PARTNER_PAYPAL_EXPRESS ];
 
 export interface PaymentMethod {
 	added: string;
-	card: string;
+	card: PaymentMethod;
 	card_type: string;
 	email: string;
 	expiry: string;

@@ -199,7 +199,7 @@ __metadata:
     "@automattic/calypso-typescript-config": "workspace:^"
     "@automattic/create-calypso-config": "workspace:^"
     "@types/cookie": ^0.4.1
-    "@types/node": ^16.11.24
+    "@types/node": ^16.11.25
     cookie: ^0.4.1
     tslib: ^2.3.0
     typescript: ^4.5.5
@@ -229,8 +229,8 @@ __metadata:
     "@jest/globals": ^27.3.1
     "@types/config": ^0.0.41
     "@types/jest": ^27.4.0
-    "@types/node": ^16.11.24
-    "@types/node-fetch": ^2.5.12
+    "@types/node": ^16.11.25
+    "@types/node-fetch": ^2.6.1
     "@types/totp-generator": ^0.0.3
     "@wordpress/i18n": ^4.2.4
     asana-phrase: ^0.0.8
@@ -6898,20 +6898,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node-fetch@npm:^2.5.12, @types/node-fetch@npm:^2.5.7":
-  version: 2.5.12
-  resolution: "@types/node-fetch@npm:2.5.12"
+"@types/node-fetch@npm:^2.5.7, @types/node-fetch@npm:^2.6.1":
+  version: 2.6.1
+  resolution: "@types/node-fetch@npm:2.6.1"
   dependencies:
     "@types/node": "*"
     form-data: ^3.0.0
-  checksum: aaa69c354e596f9e293136ac43c9e5d91503415fb4eddfae3a9689153f0f033863bbd627e700b3f419ce14d06303e18e1d61b788d9085411f1fc12fc56afe356
+  checksum: 033945215fa6b36d5597b21bbdd7d946a751dcd066f8fa71e5f5ab5698390bc2e76e38932ec6ac709def39b6371dfd61844e6804409c7ba812e24d1c820fbff8
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^16.11.24":
-  version: 16.11.24
-  resolution: "@types/node@npm:16.11.24"
-  checksum: 288fa4870a40bd05816f1c1c1fbb0764fc5a9f2d5909463765aa660064610af537699df611a45f76686d2da5949b3c30311443a63ab0e823c6f193c676367618
+"@types/node@npm:*, @types/node@npm:^16.11.25":
+  version: 16.11.25
+  resolution: "@types/node@npm:16.11.25"
+  checksum: 6070de6d1355e0a0b044319467bcaa5d18b77f87a4409418911fc99195e3200eab2eeec9db78e820dc132f5d57e977b8efc69ce3a044c45514e5a9231c3801cc
   languageName: node
   linkType: hard
 
@@ -37894,7 +37894,7 @@ testarmada-magellan@11.0.10:
     "@types/enzyme": ^3.10.11
     "@types/fast-json-stable-stringify": ^2.0.0
     "@types/lodash": ^4.14.178
-    "@types/node": ^16.11.24
+    "@types/node": ^16.11.25
     "@types/page": ^1.11.5
     "@types/qs": ^6.9.7
     "@types/react": ^17.0.39

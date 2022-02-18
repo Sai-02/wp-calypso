@@ -131,6 +131,7 @@ export default function AccordionForm< T >( {
 					isTouched={ isSectionAtIndexTouched[ `${ index }` ] }
 					onNext={ () => onNext( section.validate ) }
 					onOpen={ () => onOpen( index ) }
+					showSubmit={ index === sections.length - 1 }
 				/>
 			) ) }
 		</>

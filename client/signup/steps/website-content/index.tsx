@@ -1,3 +1,5 @@
+import { Button, Dialog } from '@automattic/components';
+import styled from '@emotion/styled';
 import debugFactory from 'debug';
 import { useTranslate } from 'i18n-calypso';
 import page from 'page';
@@ -24,6 +26,25 @@ import { sectionGenerator } from './section-generator';
 import './style.scss';
 
 const debug = debugFactory( 'calypso:difm' );
+
+const DialogContent = styled.div`
+	padding: 16px;
+	p {
+		font-size: 1rem;
+		color: var( --studio-gray-50 );
+	}
+`;
+
+const DialogButton = styled( Button )`
+	box-shadow: 0px 1px 2px rgba( 0, 0, 0, 0.05 );
+	border-radius: 5px;
+	padding: 10px 64px;
+	--color-accent: #117ac9;
+	--color-accent-60: #0e64a5;
+	.gridicon {
+		margin-left: 10px;
+	}
+`;
 
 interface WebsiteContentStepProps {
 	additionalStepData: object;
@@ -53,6 +74,8 @@ function WebsiteContentStep( {
 	const currentIndex = useSelector( getWebsiteContentDataCollectionIndex );
 	const siteCategory = useSelector( ( state ) => getDIFMLiteSiteCategory( state, siteId ) );
 
+	const [ isConfirmDialogOpen, setIsConfirmDialogOpen ] = useState( false );
+
 	useEffect( () => {
 		function getPageFromCategory( category: string | null ) {
 			switch ( category ) {
@@ -65,7 +88,6 @@ function WebsiteContentStep( {
 					return { id: 'Menu', name: translate( 'Menu' ) };
 				default:
 					return { id: 'Blog', name: translate( 'Blog' ) };
-					break;
 			}
 		}
 
@@ -109,17 +131,44 @@ function WebsiteContentStep( {
 		[ translate, websiteContent, formErrors ]
 	);
 	const generatedSections = generatedSectionsCallback();
+
+	const dialogButtons = [
+		<DialogButton borderless onClick={ () => setIsConfirmDialogOpen( false ) }>
+			{ translate( 'Cancel' ) }
+		</DialogButton>,
+		<DialogButton primary onClick={ onSubmit }>
+			{ translate( 'Submit' ) }
+		</DialogButton>,
+	];
+
 	return (
-		<AccordionForm
-			generatedSections={ generatedSections }
-			onErrorUpdates={ ( errors ) => setFormErrors( errors ) }
-			formValuesInitialState={ websiteContent }
-			currentIndex={ currentIndex }
-			updateCurrentIndex={ ( currentIndex ) => {
-				dispatch( updateWebsiteContentCurrentIndex( currentIndex ) );
-			} }
-			onSubmit={ onSubmit }
-		/>
+		<>
+			<Dialog
+				isVisible={ isConfirmDialogOpen }
+				onClose={ () => setIsConfirmDialogOpen( false ) }
+				buttons={ dialogButtons }
+			>
+				<DialogContent>
+					<h1>{ translate( 'Submit Content?' ) }</h1>
+					<p>
+						{ translate(
+							'Click "Submit" to start your site build or "Cancel" to make further edits.'
+						) }
+					</p>
+				</DialogContent>
+			</Dialog>
+
+			<AccordionForm
+				generatedSections={ generatedSections }
+				onErrorUpdates={ ( errors ) => setFormErrors( errors ) }
+				formValuesInitialState={ websiteContent }
+				currentIndex={ currentIndex }
+				updateCurrentIndex={ ( currentIndex ) => {
+					dispatch( updateWebsiteContentCurrentIndex( currentIndex ) );
+				} }
+				onSubmit={ () => setIsConfirmDialogOpen( true ) }
+			/>
+		</>
 	);
 }
 
@@ -156,7 +205,7 @@ export default function WrapperWebsiteContent(
 	//Make sure the most up to date site information is loaded so that we can validate access to this page
 	useEffect( () => {
 		siteId && dispatch( requestSite( siteId ) );
-	}, [ siteId ] );
+	}, [ dispatch, siteId ] );
 
 	useEffect( () => {
 		if ( ! isLoadingSiteInformation ) {

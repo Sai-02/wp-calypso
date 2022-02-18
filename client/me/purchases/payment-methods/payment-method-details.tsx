@@ -6,7 +6,6 @@ import { useLocalizedMoment } from 'calypso/components/localized-moment';
 import {
 	getPaymentMethodImageURL,
 	getPaymentMethodSummary,
-	PaymentMethod,
 } from 'calypso/lib/checkout/payment-methods';
 
 import 'calypso/me/purchases/payment-methods/style.scss';
@@ -20,9 +19,6 @@ interface Props {
 	paymentPartner?: string;
 	selected?: boolean;
 	isExpired?: boolean;
-	tax_postal_code: string;
-	tax_country_code: string;
-	card: PaymentMethod;
 }
 
 const PaymentMethodDetails: FunctionComponent< Props > = ( {

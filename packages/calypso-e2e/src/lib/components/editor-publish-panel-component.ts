@@ -55,13 +55,9 @@ export class EditorPublishPanelComponent {
 
 	/**
 	 * Publish or schedule the article.
-	 *
-	 * @returns {URL} URL to the published article.
 	 */
-	async publish(): Promise< URL > {
+	async publish(): Promise< void > {
 		await this.frame.click( selectors.publishButton );
-
-		return await this.getPublishedURL();
 	}
 
 	/* Post-publish state */
@@ -69,12 +65,12 @@ export class EditorPublishPanelComponent {
 	/**
 	 * Returns the URL of the published article.
 	 *
-	 * @returns {URL} URL to the published article.
+	 * @returns {string} URL to the published article.
 	 */
-	async getPublishedURL(): Promise< URL > {
+	async getPublishedURL(): Promise< string > {
 		const locator = this.frame.locator( selectors.articleURLField );
 		const publishedURL = ( await locator.getAttribute( 'value' ) ) as string;
-		return new URL( publishedURL );
+		return publishedURL;
 	}
 
 	/**

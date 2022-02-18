@@ -46,7 +46,7 @@ const selectors = {
 	// corner. This addresses the bug where the post-publish panel is immediately
 	// closed when publishing with certain blocks on the editor canvas.
 	// See https://github.com/Automattic/wp-calypso/issues/54421.
-	viewButton: 'a:text-matches("View (Post|Page)", "i")',
+	toastViewPostLink: 'a:text-matches("View (Post|Page)", "i")',
 
 	// Welcome tour
 	welcomeTourCloseButton: 'button[aria-label="Close Tour"]',
@@ -405,12 +405,17 @@ export class GutenbergEditorPage {
 		await frame.click( initialPublishButton );
 
 		const editorPublishPanelComponent = new EditorPublishPanelComponent( this.page, frame );
-		const publishedURL = await editorPublishPanelComponent.publish();
+		await editorPublishPanelComponent.publish();
+
+		const publishedURL = await Promise.race( [
+			editorPublishPanelComponent.getPublishedURL(),
+			this.getPublishedURL(),
+		] );
 
 		if ( visit ) {
-			await this.visitPublishedPost( publishedURL.href );
+			await this.visitPublishedPost( publishedURL );
 		}
-		return publishedURL.href;
+		return publishedURL;
 	}
 
 	/**
@@ -462,7 +467,7 @@ export class GutenbergEditorPage {
 	async getPublishedURL(): Promise< string > {
 		const frame = await this.getEditorFrame();
 
-		const viewPublishedArticleButton = await frame.waitForSelector( selectors.viewButton );
+		const viewPublishedArticleButton = await frame.waitForSelector( selectors.toastViewPostLink );
 		return ( await viewPublishedArticleButton.getAttribute( 'href' ) ) as string;
 	}
 
@@ -506,12 +511,7 @@ export class GutenbergEditorPage {
 			await dialog.accept();
 		} );
 
-		const frame = await this.getEditorFrame();
-
-		await Promise.all( [
-			this.page.waitForNavigation( { url: url, waitUntil: 'domcontentloaded' } ),
-			frame.click( selectors.viewButton ),
-		] );
+		await this.page.goto( url, { waitUntil: 'domcontentloaded' } );
 
 		await reloadAndRetry( this.page, confirmPostShown );
 

@@ -5,7 +5,6 @@ import {
 	STORED_CARDS_DELETE,
 	STORED_CARDS_DELETE_COMPLETED,
 	STORED_CARDS_DELETE_FAILED,
-	STORED_CARDS_EDIT_COMPLETED,
 	STORED_CARDS_FETCH,
 	STORED_CARDS_FETCH_COMPLETED,
 	STORED_CARDS_FETCH_FAILED,
@@ -79,19 +78,6 @@ export const deleteStoredCard = ( card ) => ( dispatch ) => {
 				error: error.message || i18n.translate( 'There was a problem deleting the stored card.' ),
 			} );
 		} );
-};
-
-export const updateStoredCardTaxLocation = (
-	stored_details_id,
-	tax_postal_code,
-	tax_country_code
-) => {
-	return {
-		type: STORED_CARDS_EDIT_COMPLETED,
-		stored_details_id,
-		tax_postal_code,
-		tax_country_code,
-	};
 };
 
 export const updateStoredCardIsBackupComplete = ( stored_details_id, is_backup ) => {

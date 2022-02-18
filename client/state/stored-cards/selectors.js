@@ -82,9 +82,6 @@ export const getStoredCardById = ( state, cardId ) =>
 export const hasLoadedStoredCardsFromServer = ( state ) =>
 	Boolean( state.storedCards?.hasLoadedFromServer );
 
-export const isEditingStoredCard = ( state, cardId ) =>
-	Boolean( state.storedCards?.isEditing[ cardId ] );
-
 export const isDeletingStoredCard = ( state, cardId ) =>
 	Boolean( state.storedCards?.isDeleting[ cardId ] );
 

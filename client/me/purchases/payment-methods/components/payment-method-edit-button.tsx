@@ -4,17 +4,16 @@ import { FunctionComponent } from 'react';
 
 interface Props {
 	onClick: () => void;
-	isEditing: boolean;
 	show: boolean;
 }
 
-const PaymentMethodEditButton: FunctionComponent< Props > = ( { onClick, isEditing, show } ) => {
+const PaymentMethodEditButton: FunctionComponent< Props > = ( { onClick, show } ) => {
 	const translate = useTranslate();
-	const buttonText = isEditing ? translate( 'Editing' ) : translate( 'Update Payment Info' );
+	const buttonText = translate( 'Update Payment Info' );
 
 	if ( show ) {
 		return (
-			<Button className="payment-method-edit-button" onClick={ onClick } disabled={ isEditing }>
+			<Button className="payment-method-edit-button" onClick={ onClick }>
 				{ buttonText }
 			</Button>
 		);

@@ -8,10 +8,8 @@ import debugFactory from 'debug';
 import { useTranslate } from 'i18n-calypso';
 import { Fragment, useCallback, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useSelector } from 'react-redux';
 import { getPaymentMethodSummary } from 'calypso/lib/checkout/payment-methods';
 import wpcom from 'calypso/lib/wp';
-import { isEditingStoredCard } from 'calypso/state/stored-cards/selectors';
 import PaymentMethodEditButton from './components/payment-method-edit-button';
 import PaymentMethodEditDialog from './components/payment-method-edit-dialog';
 import RenderEditFormFields from './components/payment-method-edit-form-fields';
@@ -146,8 +144,6 @@ function ExistingCardLabel( {
 	const { __, _x } = useI18n();
 	const translate = useTranslate();
 
-	const isEditing = useSelector( ( state ) => isEditingStoredCard( state, storedDetailsId ) );
-
 	const [ isDialogVisible, setIsDialogVisible ] = useState( false );
 	const closeDialog = useCallback( () => setIsDialogVisible( false ), [] );
 	const queryClient = useQueryClient();
@@ -249,11 +245,7 @@ function ExistingCardLabel( {
 					onConfirm={ updateTaxInfo }
 					form={ formRender }
 				/>
-				<PaymentMethodEditButton
-					onClick={ () => setIsDialogVisible( true ) }
-					isEditing={ isEditing }
-					show={ showButton }
-				/>
+				<PaymentMethodEditButton onClick={ () => setIsDialogVisible( true ) } show={ showButton } />
 			</div>
 		</Fragment>
 	);

@@ -73,7 +73,7 @@ const RenderEditFormFields = ( {
 							id="tax_postal_code"
 							name="tax_postal_code"
 							placeholder="Enter postal code"
-							value={ '' || postalCodeValue }
+							value={ postalCodeValue || '' }
 							onChange={ onChangePostalCode }
 						/>
 					</FormFieldAnnotation>

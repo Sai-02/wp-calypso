@@ -34,7 +34,7 @@ export default function TaxCountrySelectMenu( {
 				name={ name }
 				onChange={ onChange }
 				disabled={ isDisabled }
-				value={ currentValue }
+				defaultValue={ currentValue }
 			/>
 		</FormFieldAnnotation>
 	);

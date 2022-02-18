@@ -214,7 +214,7 @@
 		"autoprefixer": "^10.2.5",
 		"component-event": "^0.2.0",
 		"component-query": "^0.0.3",
-		"html-loader": "^0.5.5",
+		"html-loader": "^3.1.0",
 		"ignore-loader": "^0.1.2",
 		"pkg-dir": "^5.0.0",
 		"react-router": "^5.1.2",

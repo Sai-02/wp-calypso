@@ -2,16 +2,14 @@ import { Button, Dialog } from '@automattic/components';
 import { useTranslate, TranslateResult } from 'i18n-calypso';
 import { FunctionComponent } from 'react';
 import CardHeading from 'calypso/components/card-heading';
-import { PaymentMethod } from 'calypso/lib/checkout/payment-methods';
 
 import 'calypso/me/purchases/payment-methods/style.scss';
 
 interface Props {
 	paymentMethodSummary: TranslateResult;
-	card: PaymentMethod;
 	isVisible: boolean;
 	onClose: () => void;
-	onConfirm: ( event: React.MouseEvent< HTMLButtonElement > ) => void;
+	onConfirm: () => void;
 	form: JSX.Element;
 }
 

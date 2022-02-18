@@ -8,13 +8,9 @@ import debugFactory from 'debug';
 import { useTranslate } from 'i18n-calypso';
 import { Fragment, useCallback, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-	getPaymentMethodSummary,
-	PaymentMethod as PaymentMethodDetails,
-} from 'calypso/lib/checkout/payment-methods';
+import { useSelector } from 'react-redux';
+import { getPaymentMethodSummary } from 'calypso/lib/checkout/payment-methods';
 import wpcom from 'calypso/lib/wp';
-import { updateStoredCardTaxLocation } from 'calypso/state/stored-cards/actions';
 import { isEditingStoredCard } from 'calypso/state/stored-cards/selectors';
 import PaymentMethodEditButton from './components/payment-method-edit-button';
 import PaymentMethodEditDialog from './components/payment-method-edit-dialog';
@@ -28,7 +24,7 @@ const debug = debugFactory( 'wpcom-checkout:existing-card-payment-method' );
 
 async function fetchTaxInfo(
 	storedDetailsId: string
-): Promise< { tax_postal_code: string; tax_country_code: string; isTaxInfoSet: boolean } > {
+): Promise< { tax_postal_code: string; tax_country_code: string; is_tax_info_set: boolean } > {
 	return await wpcom.req.get( `/me/payment-methods/${ storedDetailsId }/tax-location` );
 }
 
@@ -56,7 +52,6 @@ export function createExistingCardMethod( {
 	paymentMethodToken,
 	paymentPartnerProcessorId,
 	activePayButtonText = undefined,
-	card,
 }: {
 	id: string;
 	cardholderName: string;
@@ -67,7 +62,6 @@ export function createExistingCardMethod( {
 	paymentMethodToken: string;
 	paymentPartnerProcessorId: string;
 	activePayButtonText: string | undefined;
-	card: PaymentMethodDetails;
 } ): PaymentMethod {
 	debug( 'creating a new existing credit card payment method', {
 		id,
@@ -86,7 +80,7 @@ export function createExistingCardMethod( {
 				cardExpiry={ cardExpiry }
 				cardholderName={ cardholderName }
 				brand={ brand }
-				card={ card }
+				paymentPartnerProcessorId={ paymentPartnerProcessorId }
 			/>
 		),
 		submitButton: (
@@ -140,69 +134,70 @@ function ExistingCardLabel( {
 	cardholderName,
 	brand,
 	storedDetailsId,
-	card,
+	paymentPartnerProcessorId,
 }: {
 	last4: string;
 	cardExpiry: string;
 	cardholderName: string;
 	brand: string;
 	storedDetailsId: string;
-	card: PaymentMethodDetails;
+	paymentPartnerProcessorId: string;
 } ): JSX.Element {
 	const { __, _x } = useI18n();
 	const translate = useTranslate();
 
-	const isEditing = useSelector( ( state ) =>
-		isEditingStoredCard( state, card.stored_details_id )
-	);
+	const isEditing = useSelector( ( state ) => isEditingStoredCard( state, storedDetailsId ) );
 
 	const [ isDialogVisible, setIsDialogVisible ] = useState( false );
 	const closeDialog = useCallback( () => setIsDialogVisible( false ), [] );
-	const reduxDispatch = useDispatch();
 	const queryClient = useQueryClient();
 
 	const { data } = useQuery<
-		{ tax_postal_code: string; tax_country_code: string; isTaxInfoSet: boolean },
+		{ tax_postal_code: string; tax_country_code: string; is_tax_info_set: boolean },
 		Error
 	>( [ 'tax-info-is-set', storedDetailsId ], () => fetchTaxInfo( storedDetailsId ), {} );
 
 	const mutation = useMutation(
-		( { taxPostalCode, taxCountryCode }: { taxPostalCode: string; taxCountryCode: string } ) =>
-			setTaxInfo( storedDetailsId, taxPostalCode, taxCountryCode ),
+		( mutationInputValues: { tax_postal_code: string; tax_country_code: string } ) =>
+			setTaxInfo(
+				storedDetailsId,
+				mutationInputValues.tax_postal_code,
+				mutationInputValues.tax_country_code
+			),
 		{
-			onMutate: ( { taxPostalCode, taxCountryCode } ) => {
+			onMutate: ( onMutateInputValues: { tax_postal_code: string; tax_country_code: string } ) => {
 				// Optimistically update the toggle
 				queryClient.setQueryData( [ 'tax-info-is-set', storedDetailsId ], {
-					tax_postal_code: taxPostalCode,
-					tax_country_code: taxCountryCode,
+					tax_postal_code: onMutateInputValues.tax_postal_code,
+					tax_country_code: onMutateInputValues.tax_country_code,
+					is_tax_info_set: true,
 				} );
+				closeDialog();
 			},
-			onSuccess: ( data: { tax_postal_code: string; tax_country_code: string } ) => {
-				queryClient.setQueryData( [ 'tax-info-is-set', storedDetailsId ], data );
-				// Update the data in the stored cards Redux store to match the changes made here
-				reduxDispatch(
-					updateStoredCardTaxLocation(
-						storedDetailsId,
-						data.tax_postal_code,
-						data.tax_country_code
-					)
-				);
+			onSuccess: ( onSuccessInputValues: {
+				tax_postal_code: string;
+				tax_country_code: string;
+			} ) => {
+				queryClient.setQueryData( [ 'tax-info-is-set', storedDetailsId ], {
+					tax_postal_code: onSuccessInputValues.tax_postal_code,
+					tax_country_code: onSuccessInputValues.tax_country_code,
+					is_tax_info_set: true,
+				} );
 			},
 		}
 	);
 
-	const updateTaxInfo = useCallback(
-		( { taxPostalCode, taxCountryCode } ) => mutation.mutate( { taxPostalCode, taxCountryCode } ),
-		[ mutation ]
-	);
-
 	const [ inputValues, setInputValues ] = useState( {
-		tax_postal_code: data?.tax_postal_code,
-		tax_country_code: data?.tax_country_code,
+		tax_postal_code: data?.tax_postal_code ?? '',
+		tax_country_code: data?.tax_country_code ?? '',
 	} );
 
-	const postalCodeValue = data?.tax_postal_code;
-	const countryCodeValue = data?.tax_country_code;
+	const postalCodeValue = inputValues.tax_postal_code;
+	const countryCodeValue = inputValues.tax_country_code;
+
+	const updateTaxInfo = useCallback( () => {
+		mutation.mutate( inputValues );
+	}, [ mutation, inputValues ] );
 
 	const onChangeCountryCode = ( e: { target: { value: string } } ) => {
 		setInputValues( { ...inputValues, tax_country_code: e.target.value } );
@@ -214,7 +209,7 @@ function ExistingCardLabel( {
 
 	const renderEditForm = (): JSX.Element => {
 		return (
-			<form onSubmit={ updateTaxInfo }>
+			<form>
 				<div className="contact-fields payment-methods__tax-fields">
 					<RenderEditFormFields
 						postalCodeValue={ postalCodeValue }
@@ -228,7 +223,7 @@ function ExistingCardLabel( {
 	};
 
 	const formRender = renderEditForm();
-	const showButton = ! data?.isTaxInfoSet;
+	const showButton = ! data?.is_tax_info_set;
 
 	/* translators: %s is the last 4 digits of the credit card number */
 	const maskedCardDetails = sprintf( _x( '**** %s', 'Masked credit card number' ), last4 );
@@ -246,14 +241,12 @@ function ExistingCardLabel( {
 				<PaymentMethodEditDialog
 					paymentMethodSummary={ getPaymentMethodSummary( {
 						translate,
-						type: card.card_type || card.payment_partner,
-						digits: card.card,
-						email: card.email,
+						type: brand || paymentPartnerProcessorId,
+						digits: last4,
 					} ) }
 					isVisible={ isDialogVisible }
 					onClose={ closeDialog }
 					onConfirm={ updateTaxInfo }
-					card={ card }
 					form={ formRender }
 				/>
 				<PaymentMethodEditButton

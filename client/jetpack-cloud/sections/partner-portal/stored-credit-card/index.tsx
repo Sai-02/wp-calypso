@@ -1,6 +1,7 @@
 import { PaymentLogo } from '@automattic/composite-checkout';
 import { useTranslate } from 'i18n-calypso';
 import { ReactElement } from 'react';
+import StoredPaymentMethodDelete from 'calypso/jetpack-cloud/sections/partner-portal/payment-methods/stored-payment-method-delete';
 import { PaymentMethod } from 'calypso/lib/checkout/payment-methods';
 import './style.scss';
 
@@ -29,6 +30,9 @@ export default function StoredCreditCard( props: { card: PaymentMethod } ): Reac
 				<div className="stored-credit-card__footer-right">
 					<div className="stored-credit-card__expiry">{ `${ expiryMonth }/${ expiryYear }` }</div>
 				</div>
+			</div>
+			<div className="stored-credit-card__actions">
+				<StoredPaymentMethodDelete card={ creditCard } />
 			</div>
 		</div>
 	);

@@ -10,7 +10,7 @@ const selectors = {
 	cancelPublishButton: `${ panel } div.editor-post-publish-panel__header-cancel-button > button`,
 
 	// Post-publish
-	postPublishClosePanelButton: `${ panel } button(type="button"]:has(svg[aria-hidden="true"])`, // aria-label changes depending on the UI language used.
+	postPublishClosePanelButton: `${ panel } button[type="button"]:has(svg[aria-hidden="true"])`, // aria-label changes depending on the UI language used.
 	viewArticleButton: `${ panel } a:text-matches("View (Post|Page)", "i")`,
 	articleURLField: `${ panel } input[readonly]`,
 	addNewButton: `${ panel } .post-publish-panel__postpublish-buttons > a`,

@@ -5,6 +5,8 @@ import { NavbarComponent } from './navbar-component';
 
 const selectors = {
 	sidebar: '.sidebar',
+	toggleCollapsedButton: '.collapse-sidebar__toggle > a.sidebar__menu-link',
+	collapsedSidebar: 'body.is-sidebar-collapsed',
 };
 
 /**
@@ -49,6 +51,10 @@ export class SidebarComponent {
 
 		if ( envVariables.VIEWPORT_NAME === 'mobile' ) {
 			await this.openMobileSidebar();
+		}
+
+		if ( this.isSideBarCollapsed() ) {
+			await this.toggleSidebar();
 		}
 
 		// Top level menu item selector.
@@ -101,6 +107,19 @@ export class SidebarComponent {
 
 		await this.page.click( ':text("Switch Site")' );
 		await this.page.waitForSelector( '.layout.focus-sites' );
+	}
+	/**
+	 * Toggles sidebar between expanded and collapsed
+	 */
+	async toggleSidebar(): Promise< void > {
+		await this.page.click( selectors.toggleCollapsedButton );
+	}
+
+	/**
+	 * Checks whether sidebar is collapsed
+	 */
+	isSideBarCollapsed(): boolean {
+		return !! this.page.locator( selectors.collapsedSidebar );
 	}
 
 	/**

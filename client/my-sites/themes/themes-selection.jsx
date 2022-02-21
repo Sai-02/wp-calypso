@@ -7,6 +7,7 @@ import QueryThemes from 'calypso/components/data/query-themes';
 import ThemesList from 'calypso/components/themes-list';
 import { recordGoogleEvent, recordTracksEvent } from 'calypso/state/analytics/actions';
 import { isUserLoggedIn } from 'calypso/state/current-user/selectors';
+import isSiteAutomatedTransfer from 'calypso/state/selectors/is-site-automated-transfer.js';
 import { getSiteSlug, isJetpackSite } from 'calypso/state/sites/selectors';
 import { setThemePreviewOptions } from 'calypso/state/themes/actions';
 import {
@@ -207,13 +208,14 @@ export const ConnectedThemesSelection = connect(
 		}
 	) => {
 		const isJetpack = isJetpackSite( state, siteId );
+		const isAtomic = isSiteAutomatedTransfer( state, siteId );
 		const premiumThemesEnabled = arePremiumThemesEnabled( state, siteId );
 
 		let sourceSiteId;
 		if ( source === 'wpcom' || source === 'wporg' ) {
 			sourceSiteId = source;
 		} else {
-			sourceSiteId = siteId && isJetpack ? siteId : 'wpcom';
+			sourceSiteId = siteId && isJetpack && ! isAtomic ? siteId : 'wpcom';
 		}
 
 		// number calculation is just a hack for Jetpack sites. Jetpack themes endpoint does not paginate the
@@ -228,12 +230,15 @@ export const ConnectedThemesSelection = connect(
 			filter: compact( [ filter, vertical ] ).join( ',' ),
 			number,
 		};
+
+		const themes = getThemesForQueryIgnoringPage( state, sourceSiteId, query ) || [];
+
 		return {
 			query,
 			source: sourceSiteId,
 			siteId: siteId,
 			siteSlug: getSiteSlug( state, siteId ),
-			themes: getThemesForQueryIgnoringPage( state, sourceSiteId, query ) || [],
+			themes,
 			themesCount: getThemesFoundForQuery( state, sourceSiteId, query ),
 			isRequesting:
 				isCustomizedThemeListLoading || isRequestingThemesForQuery( state, sourceSiteId, query ),

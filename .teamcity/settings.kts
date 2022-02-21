@@ -16,6 +16,7 @@ import jetbrains.buildServer.configs.kotlin.v2019_2.project
 import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.dockerRegistry
 import jetbrains.buildServer.configs.kotlin.v2019_2.projectFeatures.githubConnection
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.schedule
+import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 import jetbrains.buildServer.configs.kotlin.v2019_2.version
 
@@ -53,6 +54,7 @@ project {
 	subProject(_self.projects.MarTech)
 	buildType(BuildBaseImages)
 	buildType(CheckCodeStyle)
+	buildType(ValidateRenovateConfig)
 	buildType(SmartBuildLauncher)
 
 	params {
@@ -67,6 +69,8 @@ project {
 		password("mc_post_root", "credentialsJSON:2f764583-d399-4d5f-8ee1-06f68ef2e2a6", display = ParameterDisplay.HIDDEN )
 		password("mc_auth_secret", "credentialsJSON:5b1903f9-4b03-43ff-bba8-4a7509d07088", display = ParameterDisplay.HIDDEN)
 		password("mc_teamcity_webhook", "credentialsJSON:7a711930-afd4-4058-b33f-39af8a0b7f91", display = ParameterDisplay.HIDDEN)
+		password("TRANSLATE_GH_APP_SECRET", "credentialsJSON:083cc9f7-4e9a-461f-b213-bc306baaeb28", display = ParameterDisplay.HIDDEN)
+		password("TRANSLATE_GH_APP_ID", "credentialsJSON:c03b1958-5ec3-4f4c-ab1c-ca1bf0e629f5", display = ParameterDisplay.HIDDEN)
 
 		// Fetch all heads. This is used for builds that merge trunk before running tests
 		param("teamcity.git.fetchAllHeads", "true")
@@ -265,6 +269,62 @@ object CheckCodeStyle : BuildType({
 		}
 	}
 })
+
+object ValidateRenovateConfig : BuildType({
+	name = "Validate Renovate Configuration"
+	description = "Validates the renovate configuration file"
+
+	vcs {
+		root(WpCalypso)
+		cleanCheckout = true
+	}
+
+	steps {
+		bashNodeScript {
+			name = "Run renovate config validator"
+			scriptContent = """
+				# Run renovate-config-validator from the latest version of renovate
+				# in a temporary environment (to avoid installing every package.)
+				# We use the latest version because the managed renovate service
+				# controls the renovate version we use.
+				yarn dlx -p renovate renovate-config-validator
+			"""
+		}
+	}
+
+	triggers {
+		vcs {
+			// Only trigger on changes to the renovate configuration file.
+			triggerRules = "+:root=${Settings.WpCalypso.id}:renovate.json"
+			branchFilter = """
+				+:*
+				-:pull*
+			""".trimIndent()
+		}
+	}
+
+	features {
+		pullRequests {
+			vcsRootExtId = "${Settings.WpCalypso.id}"
+			provider = github {
+				authType = token {
+					token = "credentialsJSON:57e22787-e451-48ed-9fea-b9bf30775b36"
+				}
+				filterAuthorRole = PullRequests.GitHubRoleFilter.EVERYBODY
+			}
+		}
+		commitStatusPublisher {
+			vcsRootExtId = "${Settings.WpCalypso.id}"
+			publisher = github {
+				githubUrl = "https://api.github.com"
+				authType = personalToken {
+					token = "credentialsJSON:57e22787-e451-48ed-9fea-b9bf30775b36"
+				}
+			}
+		}
+	}
+})
+
 
 object SmartBuildLauncher : BuildType({
 	name = "Smart Build Launcher"

@@ -1,4 +1,5 @@
 import { Gridicon } from '@automattic/components';
+import { compose } from '@wordpress/compose';
 import classnames from 'classnames';
 import { localize } from 'i18n-calypso';
 import PropTypes from 'prop-types';
@@ -7,6 +8,7 @@ import { connect } from 'react-redux';
 import QuerySupportArticleAlternates from 'calypso/components/data/query-support-article-alternates';
 import ExternalLink from 'calypso/components/external-link';
 import { isDefaultLocale, localizeUrl } from 'calypso/lib/i18n-utils';
+import { withRouteModal } from 'calypso/lib/route-modal';
 import {
 	bumpStat,
 	composeAnalytics,
@@ -37,6 +39,7 @@ class InlineSupportLink extends Component {
 		statsGroup: PropTypes.string,
 		statsName: PropTypes.string,
 		localeSlug: PropTypes.string,
+		routeModalData: PropTypes.object,
 	};
 
 	static defaultProps = {
@@ -116,7 +119,11 @@ class InlineSupportLink extends Component {
 			<LinkComponent
 				className={ classnames( 'inline-support-link', className ) }
 				href={ url }
-				onClick={ ( event ) => openDialog( event, supportPostId, url ) }
+				onClick={ ( event ) => {
+					const openDialogReturn = openDialog( event, supportPostId, url );
+					this.props.routeModalData.openModal( supportPostId );
+					return openDialogReturn;
+				} }
 				onMouseEnter={
 					! isDefaultLocale( localeSlug ) && ! shouldLazyLoadAlternates
 						? this.loadAlternates
@@ -173,4 +180,8 @@ const mapDispatchToProps = ( dispatch, ownProps ) => {
 	};
 };
 
-export default connect( mapStateToProps, mapDispatchToProps )( localize( InlineSupportLink ) );
+export default compose(
+	connect( mapStateToProps, mapDispatchToProps ),
+	localize,
+	withRouteModal( 'support-article' )
+)( InlineSupportLink );

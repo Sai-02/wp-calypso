@@ -25,8 +25,6 @@
 	"facebook_api_key": "249643311490",
 	"discover_logged_out_redirect_url": "https://discover.wordpress.com",
 	"happychat_url": "https://happychat-io-staging.go-vip.co/customer",
-	"difm_typeform_id": "YMiXMYId",
-	"difm_signup_typeform_id": "m3s2pdgI",
 	"features": {
 		"ad-tracking": false,
 		"calypsoify/plugins": true,
@@ -51,7 +49,6 @@
 		"domains/new-status-design": true,
 		"domains/premium-domain-purchases": true,
 		"email-accounts/enabled": true,
-		"emails/in-depth-comparison": true,
 		"external-media": true,
 		"external-media/google-photos": true,
 		"external-media/free-photo-library": true,

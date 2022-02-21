@@ -4,6 +4,7 @@ import {
 	isDomainTransfer,
 	isDomainMapping,
 } from '@automattic/calypso-products';
+import { isBlankCanvasDesign } from '@automattic/design-picker';
 import debugModule from 'debug';
 import {
 	clone,
@@ -116,7 +117,7 @@ function removeLoadingScreenClassNamesFromBody() {
 }
 
 function showProgressIndicator( flowName ) {
-	const DISABLED_PROGRESS_INDICATOR_FLOWS = [ 'pressable-nux', 'setup-site', 'importer' ];
+	const DISABLED_PROGRESS_INDICATOR_FLOWS = [ 'pressable-nux', 'setup-site', 'importer', 'domain' ];
 
 	return ! DISABLED_PROGRESS_INDICATOR_FLOWS.includes( flowName );
 }
@@ -448,6 +449,7 @@ class Signup extends Component {
 			theme: selectedDesign?.theme,
 			intent,
 			startingPoint,
+			isBlankCanvas: isBlankCanvasDesign( dependencies.selectedDesign ),
 		} );
 
 		this.handleLogin( dependencies, destination );

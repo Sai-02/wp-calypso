@@ -1,20 +1,17 @@
 import { useTranslate } from 'i18n-calypso';
-import page from 'page';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import intentImageUrl from 'calypso/assets/images/onboarding/intent.svg';
 import paymentBlocksImage from 'calypso/assets/images/onboarding/payment-blocks.svg';
 import wooCommerceImage from 'calypso/assets/images/onboarding/woo-commerce.svg';
-import { useBlockEditorSettingsQuery } from 'calypso/data/block-editor/use-block-editor-settings-query';
 import { recordTracksEvent } from 'calypso/lib/analytics/tracks';
 import { localizeUrl } from 'calypso/lib/i18n-utils/utils';
+import useBranchSteps from 'calypso/signup/hooks/use-branch-steps';
 import StepWrapper from 'calypso/signup/step-wrapper';
-import { isUserLoggedIn } from 'calypso/state/current-user/selectors';
-import { getSiteEditorUrl } from 'calypso/state/selectors/get-site-editor-url';
-import { saveSignupStep } from 'calypso/state/signup/progress/actions';
+import { saveSignupStep, submitSignupStep } from 'calypso/state/signup/progress/actions';
 import { getSite } from 'calypso/state/sites/selectors';
 import { shoppingBag, truck } from '../../icons';
 import SelectItems, { SelectItem } from '../../select-items';
+import { EXCLUDED_STEPS } from '../intent/index';
 import { StoreFeatureSet } from './types';
 import './index.scss';
 
@@ -33,10 +30,15 @@ export default function StoreFeaturesStep( props: Props ): React.ReactNode {
 	const headerText = translate( 'Set up your store' );
 	const subHeaderText = translate( 'Let’s create a website that suits your needs.' );
 	const siteSlug = props.signupDependencies.siteSlug;
-	const { stepName, siteId } = props;
-	const siteEditorUrl = useSelector( ( state ) => getSiteEditorUrl( state, siteId ) );
-	const userLoggedIn = useSelector( ( state ) => isUserLoggedIn( state ) );
-	const { data: blockEditorSettings } = useBlockEditorSettingsQuery( siteId, userLoggedIn );
+	const { stepName, goToNextStep } = props;
+
+	/**
+	 * In the regular flow the "EXCLUDED_STEPS" are already excluded,
+	 * but this information is lost if the user leaves the flow and comes back,
+	 * e.g. they go to "More Power" and then click "Back"
+	 */
+	const branchSteps = useBranchSteps( stepName, () => EXCLUDED_STEPS.sell );
+	branchSteps( EXCLUDED_STEPS.sell );
 
 	const sitePlanSlug = useSelector( ( state ) => getSite( state, siteSlug )?.plan?.product_slug );
 
@@ -108,7 +110,7 @@ export default function StoreFeaturesStep( props: Props ): React.ReactNode {
 		},
 		{
 			key: 'power',
-			title: translate( 'More Power' ),
+			title: translate( 'More power' ),
 			description: (
 				<>
 					<span className="store-features__requirements">
@@ -123,7 +125,7 @@ export default function StoreFeaturesStep( props: Props ): React.ReactNode {
 
 					<p>
 						{ translate(
-							'If you have multiple products or require extensive order and shipping management than this might suit your needs better.'
+							'If you have multiple products or require extensive order and shipping management then this might suit your needs better.'
 						) }
 					</p>
 
@@ -160,18 +162,14 @@ export default function StoreFeaturesStep( props: Props ): React.ReactNode {
 		} );
 		switch ( selectedOption ) {
 			case 'power':
-				page.redirect( `/start/woocommerce-install/?site=${ siteSlug }` );
+				dispatch( submitSignupStep( { stepName }, { storeType: 'woocommerce' } ) );
 				break;
 
 			case 'simple': {
-				if ( blockEditorSettings?.is_fse_active ) {
-					page.redirect( siteEditorUrl );
-				} else {
-					page.redirect( `/page/${ siteSlug }/home/` );
-				}
-				break;
+				dispatch( submitSignupStep( { stepName } ) );
 			}
 		}
+		goToNextStep();
 	};
 
 	return (
@@ -180,7 +178,7 @@ export default function StoreFeaturesStep( props: Props ): React.ReactNode {
 			fallbackHeaderText={ headerText }
 			subHeaderText={ subHeaderText }
 			fallbackSubHeaderText={ subHeaderText }
-			headerImageUrl={ intentImageUrl }
+			headerImageUrl={ null }
 			stepContent={ <SelectItems items={ intents } onSelect={ onSelect } /> }
 			align={ 'left' }
 			hideSkip={ true }

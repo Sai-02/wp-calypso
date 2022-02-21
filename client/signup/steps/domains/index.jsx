@@ -26,9 +26,8 @@ import { getSiteTypePropertyValue } from 'calypso/lib/signup/site-type';
 import { maybeExcludeEmailsStep } from 'calypso/lib/signup/step-actions';
 import CalypsoShoppingCartProvider from 'calypso/my-sites/checkout/calypso-shopping-cart-provider';
 import { domainManagementRoot } from 'calypso/my-sites/domains/paths';
-import { getStepModuleName } from 'calypso/signup/config/step-components';
 import StepWrapper from 'calypso/signup/step-wrapper';
-import { getStepUrl } from 'calypso/signup/utils';
+import { getStepUrl, isPlanSelectionAvailableLaterInFlow } from 'calypso/signup/utils';
 import {
 	composeAnalytics,
 	recordGoogleEvent,
@@ -52,7 +51,6 @@ import {
 import { isPlanStepExistsAndSkipped } from 'calypso/state/signup/progress/selectors';
 import { setDesignType } from 'calypso/state/signup/steps/design-type/actions';
 import { getDesignType } from 'calypso/state/signup/steps/design-type/selectors';
-import { getSiteGoals } from 'calypso/state/signup/steps/site-goals/selectors';
 import { getSiteType } from 'calypso/state/signup/steps/site-type/selectors';
 import { getVerticalForDomainSuggestions } from 'calypso/state/signup/steps/site-vertical/selectors';
 import { getSelectedSite } from 'calypso/state/ui/selectors';
@@ -125,26 +123,6 @@ class DomainsStep extends Component {
 		};
 	}
 
-	/**
-	 * Derive if the "plans" step actually will be visible to the customer in a given flow after the domain step
-	 */
-	getIsPlanSelectionAvailableLaterInFlow = () => {
-		const { steps, isPlanStepSkipped } = this.props;
-
-		/**
-		 * Caveat here even though "plans" step maybe available in a flow it might not be active
-		 * i.e. Check flow "domain"
-		 */
-
-		const plansIndex = steps.findIndex( ( stepName ) => getStepModuleName( stepName ) === 'plans' );
-		const domainsIndex = steps.findIndex(
-			( stepName ) => getStepModuleName( stepName ) === 'domains'
-		);
-		const isPlansStepExistsInFutureOfFlow = plansIndex > 0 && plansIndex > domainsIndex;
-
-		return isPlansStepExistsInFutureOfFlow && ! isPlanStepSkipped;
-	};
-
 	getLocale() {
 		return ! this.props.userLoggedIn ? this.props.locale : '';
 	}
@@ -212,7 +190,7 @@ class DomainsStep extends Component {
 		 */
 		return (
 			! this.props.forceHideFreeDomainExplainerAndStrikeoutUi &&
-			this.getIsPlanSelectionAvailableLaterInFlow()
+			this.props.isPlanSelectionAvailableLaterInFlow
 		);
 	};
 
@@ -394,8 +372,7 @@ class DomainsStep extends Component {
 	};
 
 	shouldIncludeDotBlogSubdomain() {
-		const { flowName, isDomainOnly, siteType, siteGoals, signupDependencies } = this.props;
-		const siteGoalsArray = siteGoals ? siteGoals.split( ',' ) : [];
+		const { flowName, isDomainOnly, siteType, signupDependencies } = this.props;
 
 		// 'subdomain' flow coming from .blog landing pages
 		if ( flowName === 'subdomain' ) {
@@ -414,8 +391,6 @@ class DomainsStep extends Component {
 
 		// If we detect a 'blog' site type from Signup data
 		if (
-			// All flows where 'about' step is before 'domains' step, user picked only 'share' on the `about` step
-			( siteGoalsArray.length === 1 && siteGoalsArray.indexOf( 'share' ) !== -1 ) ||
 			// Users choose `Blog` as their site type
 			'blog' === get( signupDependencies, 'siteType' ) ||
 			'blog' === siteType
@@ -456,7 +431,7 @@ class DomainsStep extends Component {
 	getSideContent = () => {
 		return (
 			<div className="domains__domain-side-content-container">
-				{ ! this.shouldHideDomainExplainer() && (
+				{ ! this.shouldHideDomainExplainer() && this.props.isPlanSelectionAvailableLaterInFlow && (
 					<div className="domains__domain-side-content">
 						<ReskinSideExplainer
 							onClick={ this.handleDomainExplainerClick }
@@ -518,8 +493,6 @@ class DomainsStep extends Component {
 			includeWordPressDotCom = ! this.props.isDomainOnly;
 		}
 
-		const isPlanSelectionAvailableInFlow = this.getIsPlanSelectionAvailableLaterInFlow();
-
 		const trueNamePromoTlds = TRUENAME_COUPONS.includes( this.props?.queryObject?.coupon )
 			? TRUENAME_TLDS
 			: null;
@@ -548,7 +521,7 @@ class DomainsStep extends Component {
 						trueNamePromoTlds ? false : this.shouldIncludeDotBlogSubdomain()
 					}
 					isSignupStep
-					isPlanSelectionAvailableInFlow={ isPlanSelectionAvailableInFlow }
+					isPlanSelectionAvailableInFlow={ this.props.isPlanSelectionAvailableLaterInFlow }
 					showExampleSuggestions={ showExampleSuggestions }
 					suggestion={ initialQuery }
 					designType={ this.getDesignType() }
@@ -658,7 +631,7 @@ class DomainsStep extends Component {
 		const subHeaderPropertyName = 'signUpFlowDomainsStepSubheader';
 		const onboardingSubHeaderCopy =
 			siteType &&
-			[ 'onboarding', 'ecommerce-onboarding' ].includes( flowName ) &&
+			flowName === 'onboarding' &&
 			getSiteTypePropertyValue( 'slug', siteType, subHeaderPropertyName );
 
 		if ( onboardingSubHeaderCopy ) {
@@ -903,20 +876,21 @@ const submitDomainStepSelection = ( suggestion, section ) => {
 };
 
 export default connect(
-	( state ) => {
+	( state, { steps } ) => {
 		const productsList = getAvailableProductsList( state );
 		const productsLoaded = ! isEmpty( productsList );
+		const isPlanStepSkipped = isPlanStepExistsAndSkipped( state );
 
 		return {
 			designType: getDesignType( state ),
 			productsList,
 			productsLoaded,
-			siteGoals: getSiteGoals( state ),
 			siteType: getSiteType( state ),
 			vertical: getVerticalForDomainSuggestions( state ),
 			selectedSite: getSelectedSite( state ),
 			sites: getSitesItems( state ),
-			isPlanStepSkipped: isPlanStepExistsAndSkipped( state ),
+			isPlanSelectionAvailableLaterInFlow:
+				! isPlanStepSkipped && isPlanSelectionAvailableLaterInFlow( steps ),
 			userLoggedIn: isUserLoggedIn( state ),
 		};
 	},

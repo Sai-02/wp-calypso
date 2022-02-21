@@ -1,9 +1,11 @@
 import { Button, Gridicon } from '@automattic/components';
+import { compose } from '@wordpress/compose';
 import { localize, getLocaleSlug } from 'i18n-calypso';
 import PropTypes from 'prop-types';
 import { Component } from 'react';
 import { connect } from 'react-redux';
 import { decodeEntities, preventWidows } from 'calypso/lib/formatting';
+import { withRouteModal } from 'calypso/lib/route-modal';
 import { recordTracksEvent } from 'calypso/state/analytics/actions';
 import { requestGuidedTour } from 'calypso/state/guided-tours/actions';
 import { openSupportArticleDialog } from 'calypso/state/inline-support-article/actions';
@@ -20,6 +22,7 @@ class InlineHelpRichResult extends Component {
 		title: PropTypes.string,
 		description: PropTypes.string,
 		tour: PropTypes.string,
+		routeModalData: PropTypes.object,
 	};
 
 	getButtonLabel = ( type = RESULT_ARTICLE ) => {
@@ -76,6 +79,7 @@ class InlineHelpRichResult extends Component {
 			// the user to the localized support blog, if one exists.
 			event.preventDefault();
 			this.props.openSupportArticleDialog( { postId, postUrl: link } );
+			this.props.routeModalData.openModal( postId );
 		}
 		// falls back on href
 	};
@@ -109,4 +113,8 @@ const mapDispatchToProps = {
 	openSupportArticleDialog,
 };
 
-export default connect( null, mapDispatchToProps )( localize( InlineHelpRichResult ) );
+export default compose(
+	connect( null, mapDispatchToProps ),
+	localize,
+	withRouteModal( 'support-article' )
+)( InlineHelpRichResult );

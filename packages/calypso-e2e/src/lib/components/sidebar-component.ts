@@ -51,7 +51,7 @@ export class SidebarComponent {
 
 		if ( envVariables.VIEWPORT_NAME === 'mobile' ) {
 			await this.openMobileSidebar();
-		} else if ( this.isSideBarCollapsed() ) {
+		} else if ( await this.isSideBarCollapsed() ) {
 			console.info( 'Sidebar is collapsed, expanding...' );
 			await this.toggleSidebar();
 		}
@@ -123,8 +123,8 @@ export class SidebarComponent {
 	/**
 	 * Checks whether sidebar is collapsed
 	 */
-	isSideBarCollapsed(): boolean {
-		return !! this.page.locator( selectors.collapsedSidebar );
+	async isSideBarCollapsed(): Promise< boolean > {
+		return ( await this.page.locator( selectors.collapsedSidebar ).count() ) === 1;
 	}
 
 	/**

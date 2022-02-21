@@ -117,7 +117,7 @@ export class SidebarComponent {
 	 * Toggles sidebar between expanded and collapsed
 	 */
 	async toggleSidebar(): Promise< void > {
-		await this.page.click( selectors.toggleCollapsedButton );
+		await this.page.click( selectors.toggleCollapsedButton, { force: true } );
 	}
 
 	/**

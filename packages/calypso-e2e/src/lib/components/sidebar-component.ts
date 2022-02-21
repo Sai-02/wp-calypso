@@ -51,15 +51,20 @@ export class SidebarComponent {
 
 		if ( envVariables.VIEWPORT_NAME === 'mobile' ) {
 			await this.openMobileSidebar();
-		}
-
-		if ( this.isSideBarCollapsed() ) {
+		} else if ( this.isSideBarCollapsed() ) {
+			console.info( 'Sidebar is collapsed, expanding...' );
 			await this.toggleSidebar();
 		}
 
 		// Top level menu item selector.
 		const itemSelector = `${ selectors.sidebar } :text-is("${ item }"):visible`;
-		await this.page.dispatchEvent( itemSelector, 'click' );
+
+		if ( envVariables.VIEWPORT_NAME === 'mobile' ) {
+			await this.page.dispatchEvent( itemSelector, 'click' );
+		} else {
+			//  only hover on Desktop
+			await this.page.locator( itemSelector ).hover();
+		}
 
 		// Sub-level menu item selector.
 		if ( subitem ) {

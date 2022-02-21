@@ -34,6 +34,10 @@ export class SidebarComponent {
 	async waitForSidebarInitialization(): Promise< ElementHandle > {
 		await this.page.waitForLoadState( 'load' );
 		const sidebarElementHandle = await this.page.waitForSelector( selectors.sidebar );
+		// wait for active promotions to load because pushes shifts the sidebar down
+		await this.page.waitForRequest( /active-promotions/i, { timeout: 5000 } );
+		// let active promotions render
+		await this.page.waitForTimeout( 500 );
 		await sidebarElementHandle.waitForElementState( 'stable' );
 
 		return sidebarElementHandle;
